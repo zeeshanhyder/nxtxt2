@@ -28,7 +28,7 @@ exports.getDomainAddress = function(address) {
 }
 
 exports.getBroadcastAddress = function(){
-    return `239.0.0.0`;
+    return `239.0.0.1`;
 }
 
 
