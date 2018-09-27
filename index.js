@@ -86,6 +86,9 @@ function getBroadcastAddress(){
 
      on_message_receive(messageBuffer, rinfo){
         let message = JSON.parse(messageBuffer.toString());
+        if(message.origin === this.ip){
+            return;
+        }
         
         switch(message.body){
             // If someone is requesting information about Messaging server

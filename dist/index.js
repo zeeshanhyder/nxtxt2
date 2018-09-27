@@ -19,10 +19,8 @@ function getDomainAddress(address) {
     return domain; //return it back
 }
 
-function getBroadCastAddress(domain) {
-    //return "233.255.255.255";
+function getBroadcastAddress() {
     return '239.255.42.99';
-    //return `${domain}.255`;
 }
 
 /*
@@ -44,9 +42,8 @@ var WS_SERVER_FLAG = true;
 
 // our host address on network
 var HOST_ADDR = getIPAddress();
-var DOMAIN_ADDR = getDomainAddress(HOST_ADDR);
 // broadcast address on the network
-var BCST_ADDR = getBroadCastAddress(DOMAIN_ADDR);
+var BCST_ADDR = getBroadcastAddress();
 
 var Broadcaster = function () {
     function Broadcaster(ip, broadcast_address, port) {
@@ -63,15 +60,19 @@ var Broadcaster = function () {
     _createClass(Broadcaster, [{
         key: 'init',
         value: function init() {
-            this.broadcaster = _dgram.createSocket({ type: "udp4", reuseAddr: true });
-            this.broadcaster.bind(this.port);
+            var _this = this;
+
+            this.broadcaster = _dgram.createSocket({ type: "udp4" });
+            this.broadcaster.bind(this.port, function () {
+                _this.broadcaster.addMembership(_this.broadcast_address);
+            });
             this.broadcaster.on("listening", this.listenerFn.bind(this));
             this.broadcaster.on("message", this.on_message_receive.bind(this));
         }
     }, {
         key: 'listenerFn',
         value: function listenerFn() {
-            this.broadcaster.addMembership(this.broadcast_address);
+
             console.log('* Multicast Server listening on: ' + this.ip + ':' + this.port);
             console.log('* Running server discovery');
             // Prepare discovery message
@@ -89,6 +90,9 @@ var Broadcaster = function () {
         key: 'on_message_receive',
         value: function on_message_receive(messageBuffer, rinfo) {
             var message = JSON.parse(messageBuffer.toString());
+            if (message.origin === this.ip) {
+                return;
+            }
 
             switch (message.body) {
                 // If someone is requesting information about Messaging server
