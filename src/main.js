@@ -1,6 +1,7 @@
 "use strict";
 
 let Broadcaster = require('./broadcaster.module');
+let Messaging = require('./server.module');
 
 /*
  *
