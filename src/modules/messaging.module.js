@@ -5,6 +5,7 @@
  */
 
 let WS = require('ws');
+let MessageTypes = require('../defines/message_types');
 
 module.exports = class MessagingServer {
      constructor(ip, port){
@@ -39,8 +40,17 @@ module.exports = class MessagingServer {
      }
 
      onMessageHandler(message){
-         console.log(message);
-     }
+         try{
+            let data = JSON.parse(message);
+         
+            switch(data.type){
+                // parse here
+            }
+        } catch(e){
+
+         }
+     
+    }
 
      onConnectionHandler(ws){
          ws.on('message', this.onMessageHandler.bind(this));
