@@ -81,15 +81,22 @@ class NodeList {
     }
 }
 
+
+// initialise new server candidates list
+export const serverCandidates = new NodeList();
+
+
 module.exports = class MessagingServer {
-     constructor(ip, port){
+     constructor(ip, port, serverCandidateList){
         this.ip = ip;
         this.port = port;
-        this.clients = new NodeList()
         this.wsFlag = true;
+        this.clients = {};
+        this.serverCandidateList = serverCandidateList;
      }
 
      init(){
+
         this.server = new WS.Server({
             port: this.port,
             perMessageDeflate: {
@@ -118,6 +125,7 @@ module.exports = class MessagingServer {
             let data = JSON.parse(message);
          
             switch(data.type){
+                
                 case MessageTypes.WS_DATA_TEXT_MESSAGE:
                     if(!data.from){
                         let res = {
@@ -127,14 +135,19 @@ module.exports = class MessagingServer {
                         client.send(JSON.stringify(res));
                     }
                     this.sendMessage(message, message.to, client);
+                    break;
+                
+                
+                
                 case MessageTypes.WS_META_CLIENT_ADD:
                     this.addClient(message.id, client);
                     break;
                 default:
+                    break;
             }
         } catch(e){
 
-         }
+        }
      
     }
 
@@ -171,21 +184,36 @@ module.exports = class MessagingServer {
 
 
 
+
+
+
 module.exports = class MessagingClient{
      
-     constructor(ip,port){
+     constructor(ip,port, serverCandidateList){
         this.ip = ip;
         this.port = port;
+        this.serverCandidateList = serverCandidateList;
      }
 
      init(){
-         this.client = new WS(`ws://${this.ip}:${this.port}`);
+         this.server = new WS(`ws://${this.ip}:${this.port}`);
+         // register yourself
+         this.server.on('open', this.register.bind(this));
 
-         this.client.on('open', this.sendMessage.bind(this))
+         // get message
+         this.server.on('message', this.onMessageHandler.bind(this));
+     }
+     
+     onMessageHandler(message){
+         console.log(message);
+     }
+     
+     register(){
+        this.server.send(registrationData);
      }
 
      sendMessage(message, to, from){
-        this.client.send('Hello World!');
+        this.server.send('Hello World!');
      }
 
 
