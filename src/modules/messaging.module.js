@@ -202,6 +202,8 @@ module.exports = class MessagingClient{
 
          // get message
          this.server.on('message', this.onMessageHandler.bind(this));
+        
+         this.server.on('close', this.handleServerDisconnect.bind(this));
      }
      
      onMessageHandler(message){
@@ -209,11 +211,11 @@ module.exports = class MessagingClient{
      }
      
      register(){
-        this.server.send(registrationData);
+        this.server.send(JSON.stringify({type: WS_META_CLIENT_ADD, data: this.ip}));
      }
 
      sendMessage(message, to, from){
-        this.server.send('Hello World!');
+        this.server.send(JSON.stringify({type: MessageTypes.WS_DATA_TEXT_MESSAGE, message: message, to: to, from: from}));
      }
 
 

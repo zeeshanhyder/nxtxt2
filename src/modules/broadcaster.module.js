@@ -61,11 +61,13 @@ exports.getBroadcastAddress = function(){
      * This function initialises paramters for Broadcaster
      * @memberof Broadcaster
      */
-     constructor(ip, broadcast_address, port){
+     constructor(ip, broadcast_address, port, messagingServer, messagingClient){
         this.ip = ip;
         this.broadcast_address = broadcast_address;
         this.port = port;
         this.broadcaster = null;
+        this.messagingServer = messagingServer;
+        this.messagingClient = messagingClient;
      }
 
 
@@ -162,8 +164,9 @@ exports.getBroadcastAddress = function(){
             case BROADCAST_MESSAGE_ACK_MSG_SERVER:
                 console.log(`    -> Websockets Server discovered at: ${message.origin}`);
                 console.log(`    -> Closing local Messaging Server.`);
-                WS_SERVER_FLAG = false;
-                //server.close();
+                this.messagingServer.setWSFlag(false);
+                // reinit messaging client
+                //this.messagingClient
                 break;
             default:
                 console.log('Broadcast Receiver received unrecognized message!');
